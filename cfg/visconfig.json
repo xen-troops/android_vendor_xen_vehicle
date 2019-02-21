@@ -1,0 +1,54 @@
+{
+	"ServerURL": ":8088",
+	"VISCert": "data/wwwivi.crt.pem",
+	"VISKey": "data/wwwivi.key.pem",
+	"Adapters": [
+		{
+			"Plugin": "sensoremulatoradapter.so",
+			"Disabled": false,
+			"Params": {
+				"SensorURL": "http://localhost:8800",
+				 "UpdatePeriod": 100
+			}
+		},{
+			"Plugin": "storageadapter.so",
+			"Params": {
+				"Data" : {
+					"Attribute.Vehicle.VehicleIdentification.VIN": {"Value": "TestVIN", "Public": true, "ReadOnly": true},
+					"Attribute.Vehicle.UserIdentification.Users":  {"Value": ["User1", "Provider1"], "Public": true},
+					"Attribute.Car.Message":  {"Public": true},
+					"Attribute.Vehicle.Drivetrain.FuelSystem.TankCapacity": {"Value": 15000, "Public": true},
+					"Attribute.Vehicle.Drivetrain.FuelSystem.FuelType": {"Value": [1], "Public": true},
+					"Attribute.Vehicle.Drivetrain.Transmission.CurrentGear": {"Value": 4, "Public": true},
+					"Attribute.Vehicle.VehicleIdentification.Brand": {"Value": "VIS-based-maker", "Public": true},
+					"Test.Vehicle.hvac.fan_speed": {"Value": 2, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.Row1.FanSpeed": {"Value": 6, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.Row1.FanDirection": {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.Row1.Right.Temperature": {"Value": 20, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.Row1.Left.Temperature": {"Value": 22, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsFrontDefrosterActive": {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsRearDefrosterActive": {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsMaxDefrosterOn": {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsAutoRecirculationActive" : {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsRecirculationActive" : {"Value": 1, "Public": true},	
+					"Actuator.Vehicle.Cabin.HVAC.IsMaxAcActive" : {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsAutoOn" : {"Value": 1, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsDualOn" : {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.temperatureDisplayUnits" : {"Value": 49, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsPowerOn" : {"Value": 1, "Public": true},
+					"Actuator.Vehicle.Cabin.HVAC.IsAirConditioningActive" : {"Value": 1, "Public": true},
+					"Actuator.Vehicle.Cabin.Door.Row1.Left.IsLocked" : {"Value": 1, "Public": true},
+					"Actuator.Vehicle.Cabin.Door.Row1.Right.IsLocked" : {"Value": 1, "Public": true},
+					"Actuator.Vehicle.ADAS.ABS.IsActive" : {"Value": 0, "Public": true},
+					"Actuator.Vehicle.ADAS.TCS.IsActive" : {"Value": 0, "Public": true},
+					"Actuator.Vehicle.Cabin.HwInput" : {"Value": [0, 45, 0], "Public": true},
+					"Sensor.Vehicle.WheelTick" : {"Value": [0, 102000, 200000, 300000, 400001], "Public": true},	
+					"Sensor.Vehicle.IgnitionState": {"Value": 0, "Public": true},
+					"Sensor.Vehicle.Drivetrain.FuelSystem.LowFuelLevel": {"Value": 0, "Public": true},
+					"Sensor.Vehicle.Tank.TankDoor": {"Value": 1, "Public": true},
+					"Test.Fv": {"Value": [1.1,1.2,3.3,3.4], "Public": true}
+				}
+			}
+		}
+	]
+}

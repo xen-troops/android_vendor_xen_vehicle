@@ -1,0 +1,43 @@
+[{
+		"description": "Fan speed, configure by HVAC",
+		"vis-property": "Test.Vehicle.hvac.fan_speed",
+		"android-property-id-as-string": "VehicleProperty::HVAC_FAN_SPEED",
+		"android-property-id": 356517120,
+		"area-id":117
+	},
+	{
+		"description": "Fuel  level",
+		"vis-property": "Signal.Emulator.telemetry.avgfuellvl",
+		"android-property-id-as-string": "VehicleProperty::FUEL_LEVEL",
+		"android-property-id": 291504903,
+		"area-id":0
+	},
+	{
+		"description": "Engine RPM",
+		"vis-property": "Signal.Emulator.telemetry.engrpml",
+		"android-property-id-as-string": "VehicleProperty::ENGINE_RPM",
+		"android-property-id": 291504901,
+		"area-id":0
+	},
+	{
+		"description": "Current odometer value",
+		"vis-property": "Signal.Emulator.telemetry.odo",
+		"android-property-id-as-string": "VehicleProperty::PERF_ODOMETER",
+		"android-property-id": 291504644,
+		"area-id":0
+	},
+	{
+		"description": "Speed of the vehicle",
+		"vis-property": "Signal.Emulator.telemetry.veh_speed",
+		"android-property-id-as-string": "VehicleProperty::PERF_VEHICLE_SPEED",
+		"android-property-id": 291504647,
+		"area-id":0
+	},
+	{
+		"description": "Selected gear",
+		"vis-property": "Signal.Emulator.telemetry.gr",
+		"android-property-id-as-string": "VehicleProperty::CURRENT_GEAR",
+		"android-property-id": 289408001,
+		"area-id":0
+	}
+]

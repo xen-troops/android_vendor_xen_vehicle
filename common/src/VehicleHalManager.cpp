@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "automotive.vehicle@2.0-impl"
+#define LOG_TAG "automotive.vehicle@2.0-xenvm"
 
 #include "VehicleHalManager.h"
 
@@ -239,11 +239,13 @@ void VehicleHalManager::onBatchHalEvent(const std::vector<VehiclePropValuePtr>& 
         int i = 0;
         for (VehiclePropValue* pValue : cv.values) {
             shallowCopy(&(vec)[i++], *pValue);
+            ALOGV("VehicleHalManager::onBatchHalEvent  %d [ts=%" PRIu64 "]", pValue->prop,
+                  pValue->timestamp);
         }
+
         auto status = cv.client->getCallback()->onPropertyEvent(vec);
         if (!status.isOk()) {
-            ALOGE("Failed to notify client %s, err: %s",
-                  toString(cv.client->getCallback()).c_str(),
+            ALOGE("Failed to notify client %s, err: %s", toString(cv.client->getCallback()).c_str(),
                   status.description().c_str());
         }
     }
@@ -257,8 +259,8 @@ float VehicleHalManager::checkSampleRate(const VehiclePropConfig &config,
                                          float sampleRate) {
     if (isSampleRateFixed(config.changeMode)) {
         if (std::abs(sampleRate) > std::numeric_limits<float>::epsilon()) {
-            ALOGW("Sample rate is greater than zero for on change type. "
-                      "Ignoring it.");
+            ALOGW("Sample rate[%f] for property 0x%x is greater than zero for on change type. "
+                      "Ignoring it.", sampleRate, config.prop);
         }
         return 0.0;
     } else {
