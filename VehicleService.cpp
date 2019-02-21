@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2019 EPAM Systems Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +15,23 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "automotive.vehicle@2.0-service"
+#define LOG_TAG "automotive.vehicle@2.0-service.xenvm"
 #include <android/log.h>
 #include <hidl/HidlTransportSupport.h>
 
 #include <iostream>
 
 #include <vhal_v2_0/VehicleHalManager.h>
-#include <vhal_v2_0/EmulatedVehicleHal.h>
+#include <vhal_v2_0/VisVehicleHal.h>
 
 using namespace android;
 using namespace android::hardware;
 using namespace android::hardware::automotive::vehicle::V2_0;
+using namespace android::hardware::automotive::vehicle::V2_0::xenvm;
 
 int main(int /* argc */, char* /* argv */ []) {
     auto store = std::make_unique<VehiclePropertyStore>();
-    auto hal = std::make_unique<impl::EmulatedVehicleHal>(store.get());
-    auto emulator = std::make_unique<impl::VehicleEmulator>(hal.get());
+    auto hal = std::make_unique<VisVehicleHal>(store.get());
     auto service = std::make_unique<VehicleHalManager>(hal.get());
 
     configureRpcThreadpool(4, true /* callerWillJoin */);
