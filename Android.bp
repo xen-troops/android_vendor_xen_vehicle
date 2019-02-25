@@ -87,4 +87,28 @@ cc_binary {
     ], 
 }
 
-
+cc_test {
+    name: "vis_test",
+    vendor: true,
+    defaults: ["vhal_v2_0_defaults.xenvm"],
+    srcs: [
+        "tests/VisTest.cpp",
+    ],
+    shared_libs: [
+        "android.hardware.automotive.vehicle@2.0-manager-lib.xenvm",
+        "libuws",
+        "libcrypto",
+        "libz",
+        "libssl",
+        "libcutils",
+    ],
+    static_libs: [
+        "libjsoncpp",
+    ],
+    include_dirs: [
+        "vendor/unetworking/uwebsockets/src",
+        "external/boringssl/include",
+        "external/zlib",
+    ],
+    local_include_dirs: ["common/include/vhal_v2_0"],
+}
