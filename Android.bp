@@ -1,4 +1,5 @@
 // Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2019 EPAM Systems Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-cc_defaults {
-    name: "vhal_v2_0_defaults.xenvm",
+cc_binary {
+    name: "android.hardware.automotive.vehicle@2.0-service.xenvm",
+    init_rc: ["android.hardware.automotive.vehicle@2.0-service.xenvm.rc"],
+    vendor: true,
+    relative_install_path: "hw",
+    srcs: [
+        "VehicleService.cpp",
+        "common/src/SubscriptionManager.cpp",
+        "common/src/VehicleHalManager.cpp",
+        "common/src/VehicleObjectPool.cpp",
+        "common/src/VehiclePropertyStore.cpp",
+        "common/src/VehicleUtils.cpp",
+        "common/src/VisVehicleHal.cpp",
+        "common/src/VisClient.cpp",
+    ],
     shared_libs: [
+        "libbase",
+        "libvisclient",
         "libhidlbase",
         "libhidltransport",
         "liblog",
@@ -26,35 +42,38 @@ cc_defaults {
         "libssl",
         "libcutils",
     ],
-    cflags: [
+    static_libs: [
+        "libjsoncpp",
+    ],
+    include_dirs: [
+        "vendor/unetworking/uwebsockets/src",
+        "external/boringssl/include",
+        "external/zlib",
+    ],
+    local_include_dirs: ["common/include/vhal_v2_0"],
+        cflags: [
         "-Wall",
         "-Wextra",
         "-Werror",
     ],
 }
 
-cc_library_headers {
-    name: "vhal_v2_0_common_headers.xenvm",
-    vendor: true,
-    export_include_dirs: ["common/include/vhal_v2_0"],
-}
-
-// Vehicle reference implementation lib
 cc_library {
-    name: "android.hardware.automotive.vehicle@2.0-manager-lib.xenvm",
+    name: "libvisclient",
     vendor: true,
-    defaults: ["vhal_v2_0_defaults.xenvm"],
     srcs: [
-        "common/src/SubscriptionManager.cpp",
-        "common/src/VehicleHalManager.cpp",
-        "common/src/VehicleObjectPool.cpp",
-        "common/src/VehiclePropertyStore.cpp",
-        "common/src/VehicleUtils.cpp",
-        "common/src/VisVehicleHal.cpp",
         "common/src/VisClient.cpp",
     ],
     static_libs: [
     	"libjsoncpp",
+    ],
+    shared_libs: [
+        "liblog",
+        "libuws",
+        "libcrypto",
+        "libz",
+        "libssl",
+        "libcutils",
     ],
     include_dirs: [
     	"vendor/unetworking/uwebsockets/src",
@@ -65,42 +84,20 @@ cc_library {
     export_include_dirs: ["common/include"],
 }
 
-
-cc_binary {
-    name: "android.hardware.automotive.vehicle@2.0-service.xenvm",
-    defaults: ["vhal_v2_0_defaults.xenvm"],
-    init_rc: ["android.hardware.automotive.vehicle@2.0-service.xenvm.rc"],
-    vendor: true,
-    relative_install_path: "hw",
-    srcs: ["VehicleService.cpp"],
-    shared_libs: [
-        "libbase",
-    ],
-    static_libs: [
-        "android.hardware.automotive.vehicle@2.0-manager-lib.xenvm",
-        "libjsoncpp",
-    ],
-    include_dirs: [
-    	"vendor/unetworking/uwebsockets/src",
-		"external/boringssl/include",
-    	"external/zlib",
-    ], 
-}
-
 cc_test {
     name: "vis_test",
     vendor: true,
-    defaults: ["vhal_v2_0_defaults.xenvm"],
     srcs: [
         "tests/VisTest.cpp",
     ],
     shared_libs: [
-        "android.hardware.automotive.vehicle@2.0-manager-lib.xenvm",
+        "liblog",
         "libuws",
         "libcrypto",
         "libz",
         "libssl",
         "libcutils",
+        "libvisclient",
     ],
     static_libs: [
         "libjsoncpp",
