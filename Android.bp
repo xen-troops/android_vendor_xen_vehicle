@@ -26,7 +26,6 @@ cc_binary {
         "common/src/VehiclePropertyStore.cpp",
         "common/src/VehicleUtils.cpp",
         "common/src/VisVehicleHal.cpp",
-        "common/src/VisClient.cpp",
     ],
     shared_libs: [
         "libbase",
@@ -36,19 +35,13 @@ cc_binary {
         "liblog",
         "libutils",
         "android.hardware.automotive.vehicle@2.0",
-        "libuws",
         "libcrypto",
-        "libz",
-        "libssl",
         "libcutils",
+        "libuws",
+        "libz",
     ],
     static_libs: [
         "libjsoncpp",
-    ],
-    include_dirs: [
-        "vendor/unetworking/uwebsockets/src",
-        "external/boringssl/include",
-        "external/zlib",
     ],
     local_include_dirs: ["common/include/vhal_v2_0"],
         cflags: [
@@ -72,16 +65,11 @@ cc_library {
         "libuws",
         "libcrypto",
         "libz",
-        "libssl",
         "libcutils",
     ],
-    include_dirs: [
-    	"vendor/unetworking/uwebsockets/src",
-    	"external/boringssl/include",
-    	"external/zlib",
-    ],  
     local_include_dirs: ["common/include/vhal_v2_0"],
     export_include_dirs: ["common/include"],
+    export_shared_lib_headers:["libuws"],
 }
 
 cc_test {
@@ -95,17 +83,11 @@ cc_test {
         "libuws",
         "libcrypto",
         "libz",
-        "libssl",
         "libcutils",
         "libvisclient",
     ],
     static_libs: [
         "libjsoncpp",
-    ],
-    include_dirs: [
-        "vendor/unetworking/uwebsockets/src",
-        "external/boringssl/include",
-        "external/zlib",
     ],
     local_include_dirs: ["common/include/vhal_v2_0"],
 }
