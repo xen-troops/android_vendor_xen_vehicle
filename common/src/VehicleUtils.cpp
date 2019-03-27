@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "automotive.vehicle@2.0-impl"
+#define LOG_TAG "automotive.vehicle@2.0-xenvm"
 
 #include "VehicleUtils.h"
 
