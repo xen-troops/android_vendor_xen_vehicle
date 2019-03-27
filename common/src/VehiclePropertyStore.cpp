@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "VehiclePropertyStore"
+#define LOG_TAG "automotive.vehicle@2.0-xenvm.propertystore"
 #include <log/log.h>
 
 #include <common/include/vhal_v2_0/VehicleUtils.h>

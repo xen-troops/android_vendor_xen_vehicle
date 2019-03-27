@@ -16,7 +16,7 @@
  */
 
 // #define LOG_NDEBUG 0
-#define LOG_TAG "vehicle.xenvm"
+#define LOG_TAG "automotive.vehicle@2.0-xenvm"
 
 #include <android-base/macros.h>
 #include <android/log.h>
