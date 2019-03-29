@@ -390,6 +390,10 @@ void VisVehicleHal::subscribeToAll() {
 
     epam::Status st = mVisClient.subscribeProperty(str, resultHandler, f);
     ALOGV("Subscribe retrned OK = %d", st == epam::Status::OK);
+    if (st !=  epam::Status::OK) {
+        ALOGE("Subscription is failed : %d", st);
+        return;
+    }
     if (!f.valid()) {
         ALOGE("Unable to subscribe: future is not valid !");
         return;
@@ -410,7 +414,7 @@ bool VisVehicleHal::fetchAllAndSubscribe() {
     if ((mValuesAreDirty == true) &&
         (mVisClient.getConnectedState() == epam::ConnState::STATE_CONNECTED)) {
         epam::WMessageResult sr;
-        epam::Status st = mVisClient.getPropertySync("*", sr);
+        epam::Status st = mVisClient.getPropertySync(VisClient::kAllTag, sr);
         if (st != epam::Status::OK) {
             ALOGE("Unable to get * from VIS");
             return false;
