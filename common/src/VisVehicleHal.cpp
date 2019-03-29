@@ -210,17 +210,20 @@ void VisVehicleHal::subscriptionHandler(const epam::CommandResult& result) {
         auto range = mVisNameToVProperty.equal_range(item.first);
         for (auto it = range.first; it != range.second; ++it) {
             ALOGV("Will convert VIS property %s to vehicle prop", item.first.c_str());
-            auto result = mPropStore->readValueOrNull(it->second.prop, it->second.area);
-            if (result) {
-                auto val = result.get();
+            auto valResult = mPropStore->readValueOrNull(it->second.prop, it->second.area);
+            if (valResult) {
+                auto val = valResult.get();
                 if (jsonToVehicle(item.second, *val)) {
                     if (mPropStore->writeValue(*val, true)) {
                         ALOGV("Value for property %d area=%d|%s updated to %s", it->second.prop,
                               it->second.area, it->first.c_str(),
                               vehiclePropValueToString(*val).c_str());
-                        auto v = getValuePool()->obtain(*val);
-                        v->timestamp = elapsedRealtimeNano();
-                        doHalEvent(std::move(v));
+                        /* Do not send updates for continuos properties*/
+                        if (!isContinuousProperty(val->prop)) {
+                            auto v = getValuePool()->obtain(*val);
+                            v->timestamp = elapsedRealtimeNano();
+                            doHalEvent(std::move(v));
+                        }
                     } else {
                         ALOGE("Unable to update property %d area=%d|%s", it->second.prop,
                               it->second.area, it->first.c_str());
