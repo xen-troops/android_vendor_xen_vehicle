@@ -40,9 +40,6 @@ cc_binary {
         "libuws",
         "libz",
     ],
-    static_libs: [
-        "libjsoncpp",
-    ],
     local_include_dirs: ["common/include/vhal_v2_0"],
         cflags: [
         "-Wall",
@@ -68,8 +65,16 @@ cc_library {
         "libcutils",
     ],
     local_include_dirs: ["common/include/vhal_v2_0"],
-    export_include_dirs: ["common/include"],
-    export_shared_lib_headers:["libuws"],
+    export_include_dirs: [
+        "common/include",
+        "common/include/vhal_v2_0",
+    ],
+    export_shared_lib_headers:[
+        "libuws",
+    ],
+    export_static_lib_headers:[
+        "libjsoncpp",
+    ],
 }
 
 cc_test {
