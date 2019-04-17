@@ -77,6 +77,7 @@ class VisClient {
      */
     void setUri(const std::string& uri);
 
+    /* Asynchronous API */
     Status getProperty(const std::string& propertyGet, std::future<WMessageResult>& future);
     Status setProperty(const std::string& propertySet, std::future<WMessageResult>& future);
     Status subscribeProperty(const std::string& propertyName, CommandHandler observer,
@@ -84,12 +85,18 @@ class VisClient {
     Status unsubscribe(const std::string& subscriptionId, CommandHandler observer,
                        std::future<WMessageResult>& future);
     Status unsubscribeAll(std::future<WMessageResult>& future);
-    /* Status unsubscribeAllSync(); */
+
+    /* Synchronous API */
 
     Status getPropertySync(const std::string& propertyGet, WMessageResult& result);
     Status setPropertySync(const std::string& propertySet);
+    Status subscribePropertySync(const std::string& propertyName, CommandHandler observer,
+                                 WMessageResult& result);
+    Status unsubscribeSync(const std::string& subscriptionId, CommandHandler observer,
+                           WMessageResult& result);
+    Status unsubscribeAllSync();
 
-    void setPereodicalGet(bool enable);
+    /* Connection API */
     void start();
     void stop();
     ConnState getConnectedState() const { return mConnectedState; }
@@ -100,12 +107,10 @@ class VisClient {
     }
 
  private:
+
     int init();
     int doInit();
     int poll();
-
-    Status doSubscribeProperty(const std::string& propertyName, CommandHandler observer,
-                               std::future<WMessageResult>& future);
 
     int sendWSMessage(const char* templ, const char* param);
     int sendWSMessage(const char* templ, const char* param, std::string& message);
@@ -140,7 +145,6 @@ class VisClient {
     std::map<size_t, std::promise<Status>> mRequesIdToPromise;
     std::thread mThread;
     std::atomic<bool> mIsActive;
-    bool pereodicalGetEnabled;
     uWS::WebSocket<uWS::CLIENT>* mWs;
     // Mapping of requestId to subscribe handler
     std::map<int, SubscriptionRequest> mSubscriptionObservers;
