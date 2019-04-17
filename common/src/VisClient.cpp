@@ -22,11 +22,10 @@
 
 namespace epam {
 
-VisClient::VisClient() : mConnectedState(ConnState::STATE_DISCONNECTED) {
-    pereodicalGetEnabled = false;
-    mWs = nullptr;
-    recoverSubscribe = false;
-    mServerConnectionHandler = nullptr;
+VisClient::VisClient()
+: mConnectedState(ConnState::STATE_DISCONNECTED), mWs(nullptr), recoverSubscribe(false),
+  mServerConnectionHandler(nullptr)
+{
 }
 
 void VisClient::setUri(const std::string& uri) {
@@ -160,11 +159,11 @@ int VisClient::init() {
         std::bind(&VisClient::handleDisconnection, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     mHub.onDisconnection(disconnectionHandler);
-
+    }
     return doInit();
 }
 
-/* Working with VIS data */
+/* Working with VIS data / Public API */
 
 Status VisClient::getProperty(const std::string& propertyPath,
                               std::future<WMessageResult>& future) {
@@ -201,62 +200,9 @@ Status VisClient::setProperty(const std::string& propertySet, std::future<WMessa
     return Status::OK;
 }
 
-Status VisClient::getPropertySync(const std::string& propertyGet, WMessageResult& result) {
-    std::future<WMessageResult> f;
-    Status st = getProperty(propertyGet, f);
-    if (st != Status::OK) return st;
-    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
-        ALOGE("setPropertySync timeout %d !", kMaxWsMessageDelaySec);
-        return Status::UNKNOWN_ERROR;
-    }
-    result = f.get();
-    return result.status;
-}
-
-Status VisClient::setPropertySync(const std::string& propertySet) {
-    std::future<WMessageResult> f;
-    Status st = setProperty(propertySet, f);
-    if (st != Status::OK) return st;
-    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
-        ALOGE("setPropertySync timeout for %d second(s) !", kMaxWsMessageDelaySec);
-        return Status::UNKNOWN_ERROR;
-    }
-    WMessageResult sr = f.get();
-    return sr.status;
-}
-
-void VisClient::setPereodicalGet(bool enable) {
-    std::lock_guard<std::mutex> lock(mLock);
-    pereodicalGetEnabled = enable;
-}
-
-int VisClient::sendWSMessage(const char* templ, const char* param) {
-    if (mWs) {
-        char buffer[kMaxBufferLength];
-        snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
-        mWs->send(buffer);
-        return mRequestId;
-    } else {
-        ALOGE("Unable to send command through, no websocket.");
-    }
-    return -1;
-}
-
-int VisClient::sendWSMessage(const char* templ, const char* param, std::string& message) {
-    if (mWs) {
-        char buffer[kMaxBufferLength];
-        snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
-        mWs->send(buffer);
-        message.assign(buffer);
-        return mRequestId;
-    } else {
-        ALOGE("Unable to send command through, no websocket.");
-    }
-    return -1;
-}
-
-Status VisClient::doSubscribeProperty(const std::string& propertyName, CommandHandler observer,
+Status VisClient::subscribeProperty(const std::string& propertyName, CommandHandler observer,
                                       std::future<WMessageResult>& future) {
+    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
@@ -275,12 +221,6 @@ Status VisClient::doSubscribeProperty(const std::string& propertyName, CommandHa
     future = p.get_future();
     mPromised.emplace(std::pair<int, std::promise<WMessageResult> >(id, std::move(p)));
     return Status::OK;
-}
-
-Status VisClient::subscribeProperty(const std::string& propertyName, CommandHandler observer,
-                                    std::future<WMessageResult>& future) {
-    std::lock_guard<std::mutex> lock(mLock);
-    return doSubscribeProperty(propertyName, observer, future);
 }
 
 Status VisClient::unsubscribe(const std::string& subscriptionId, CommandHandler observer,
@@ -318,6 +258,95 @@ Status VisClient::unsubscribeAll(std::future<WMessageResult>& future) {
     future = p.get_future();
     mPromised.emplace(std::pair<int, std::promise<WMessageResult> >(id, std::move(p)));
     return Status::OK;
+}
+
+Status VisClient::getPropertySync(const std::string& propertyGet, WMessageResult& result) {
+    std::future<WMessageResult> f;
+    Status st = getProperty(propertyGet, f);
+    if (st != Status::OK) return st;
+    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
+        ALOGE("getPropertySync timeout %d !", kMaxWsMessageDelaySec);
+        return Status::UNKNOWN_ERROR;
+    }
+    result = f.get();
+    return result.status;
+}
+
+Status VisClient::setPropertySync(const std::string& propertySet) {
+    std::future<WMessageResult> f;
+    Status st = setProperty(propertySet, f);
+    if (st != Status::OK) return st;
+    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
+        ALOGE("setPropertySync timeout for %d second(s) !", kMaxWsMessageDelaySec);
+        return Status::UNKNOWN_ERROR;
+    }
+    WMessageResult sr = f.get();
+    return sr.status;
+}
+
+Status VisClient::subscribePropertySync(const std::string& propertyName, CommandHandler observer,
+                                 WMessageResult& result) {
+    std::future<WMessageResult> f;
+    Status st = subscribeProperty(propertyName, observer, f);
+    if (st != Status::OK) return st;
+    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
+        ALOGE("subscribePropertySync timeout for %d second(s) !", kMaxWsMessageDelaySec);
+        return Status::UNKNOWN_ERROR;
+    }
+    result = f.get();
+    return result.status;
+}
+
+Status VisClient::unsubscribeSync(const std::string& subscriptionId, CommandHandler observer,
+                           WMessageResult& result) {
+    std::future<WMessageResult> f;
+    Status st = unsubscribe(subscriptionId, observer, f);
+    if (st != Status::OK) return st;
+    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
+        ALOGE("unsubscribeSync timeout for %d second(s) !", kMaxWsMessageDelaySec);
+        return Status::UNKNOWN_ERROR;
+    }
+    result = f.get();
+    return result.status;
+}
+
+Status VisClient::unsubscribeAllSync() {
+    std::future<WMessageResult> f;
+    Status st = unsubscribeAll(f);
+    if (st != Status::OK) return st;
+    if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
+        ALOGE("unsubscribeSync timeout for %d second(s) !", kMaxWsMessageDelaySec);
+        return Status::UNKNOWN_ERROR;
+    }
+    WMessageResult result = f.get();
+    return result.status;
+}
+
+/* WS API */
+
+int VisClient::sendWSMessage(const char* templ, const char* param) {
+    if (mWs) {
+        char buffer[kMaxBufferLength];
+        snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
+        mWs->send(buffer);
+        return mRequestId;
+    } else {
+        ALOGE("Unable to send command through, no websocket.");
+    }
+    return -1;
+}
+
+int VisClient::sendWSMessage(const char* templ, const char* param, std::string& message) {
+    if (mWs) {
+        char buffer[kMaxBufferLength];
+        snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
+        mWs->send(buffer);
+        message.assign(buffer);
+        return mRequestId;
+    } else {
+        ALOGE("Unable to send command through, no websocket.");
+    }
+    return -1;
 }
 
 /* uWS specific handlers*/
