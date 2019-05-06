@@ -159,7 +159,6 @@ int VisClient::init() {
         std::bind(&VisClient::handleDisconnection, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     mHub.onDisconnection(disconnectionHandler);
-    }
     return doInit();
 }
 
