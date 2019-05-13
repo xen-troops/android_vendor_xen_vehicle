@@ -140,7 +140,7 @@ class VisClient {
 
     std::string mUri;
     uWS::Hub mHub;
-    ConnState mConnectedState;
+    std::atomic<ConnState> mConnectedState;
     mutable std::mutex mLock;
     std::map<size_t, std::promise<Status>> mRequesIdToPromise;
     std::thread mThread;
