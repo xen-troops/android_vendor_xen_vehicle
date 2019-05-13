@@ -58,21 +58,6 @@ void VisClient::start() {
     ALOGV("VisClient thread has started ...");
 }
 
-bool VisClient::waitConnectionS(int s) const {
-    ALOGV("waitConnectionMs");
-    int minSleepTime = std::min(s, 1);
-    int timeSleeped = 0;
-    std::unique_lock<std::mutex> lock(mLock);
-    while (mConnectedState != epam::ConnState::STATE_CONNECTED) {
-        lock.unlock();
-        sleep(minSleepTime);
-        lock.lock();
-        timeSleeped += minSleepTime;
-        if (timeSleeped >= s) break;
-    }
-    return mConnectedState == epam::ConnState::STATE_CONNECTED;
-}
-
 void VisClient::stop() {
     ALOGV("stop");
     mIsActive = false;
@@ -82,13 +67,27 @@ void VisClient::stop() {
     ALOGI("VisClient thread has stopped ...");
 }
 
+bool VisClient::waitConnectionS(int s) const {
+    ALOGV("waitConnectionMs");
+    int minSleepTime = std::min(s, 1);
+    int timeSleeped = 0;
+    while (mConnectedState != epam::ConnState::STATE_CONNECTED) {
+        sleep(minSleepTime);
+        timeSleeped += minSleepTime;
+        if (timeSleeped >= s) break;
+    }
+    return mConnectedState == epam::ConnState::STATE_CONNECTED;
+}
+
+/* Private API */
+
 int VisClient::poll() {
-    mLock.lock();
-    ALOGV("poll, connection state is %d", static_cast<int>(mConnectedState));
+    ALOGV("poll, connection state is %d", static_cast<int>(mConnectedState.load()));
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         doInit();
     } else if (mConnectedState == ConnState::STATE_CONNECTED) {
 #ifdef RECOVER_SUBSCRIBE
+        std::lock_guard<std::mutex> lock(mLock);
         for (auto it = mRecoverObservers.begin(); it != mRecoverObservers.end();) {
             ALOGI("Found some observer %du for recovery", it->first);
             int id = sendWSMessage(requestTemplateSubscribe, it->second.propertyName.c_str());
@@ -97,7 +96,6 @@ int VisClient::poll() {
                 ++it;
                 continue;
             }
-
             SubscriptionRequest sr{it->second.handler, it->second.propertyName,
                                    static_cast<size_t>(id)};
             mSubscriptionObservers.insert(std::make_pair(id, sr));
@@ -107,7 +105,6 @@ int VisClient::poll() {
         }
 #endif
     }
-    mLock.unlock();
 
     // poll can trigger other event under mLock
     mHub.poll();
@@ -116,11 +113,14 @@ int VisClient::poll() {
 
 int VisClient::doInit() {
     ALOGV("doInit");
+
     mRequestId = 0;
     mProtocolErrorCount = 0;
+    mConnectedState = ConnState::STATE_CONNECTING;
+
     ALOGD("Will try to connect to VIS uri[%s]", mUri.c_str());
     mHub.connect(mUri.c_str(), reinterpret_cast<void*>(CONNECTION_MODE_SSL));
-    mConnectedState = ConnState::STATE_CONNECTING;
+    ALOGV("doInit end");
     return 0;
 }
 
@@ -166,10 +166,10 @@ int VisClient::init() {
 
 Status VisClient::getProperty(const std::string& propertyPath,
                               std::future<WMessageResult>& future) {
-    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
+    std::lock_guard<std::mutex> lock(mLock);
     int id = sendWSMessage(requestTemplateGet, propertyPath.c_str());
 
     if (id < 0) {
@@ -183,10 +183,10 @@ Status VisClient::getProperty(const std::string& propertyPath,
 }
 
 Status VisClient::setProperty(const std::string& propertySet, std::future<WMessageResult>& future) {
-    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
+    std::lock_guard<std::mutex> lock(mLock);
     int id = sendWSMessage(requestTemplateSet, propertySet.c_str());
 
     if (id < 0) {
@@ -201,11 +201,10 @@ Status VisClient::setProperty(const std::string& propertySet, std::future<WMessa
 
 Status VisClient::subscribeProperty(const std::string& propertyName, CommandHandler observer,
                                       std::future<WMessageResult>& future) {
-    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
-
+    std::lock_guard<std::mutex> lock(mLock);
     std::string message;
     int id = sendWSMessage(requestTemplateSubscribe, propertyName.c_str(), message);
 
@@ -224,11 +223,10 @@ Status VisClient::subscribeProperty(const std::string& propertyName, CommandHand
 
 Status VisClient::unsubscribe(const std::string& subscriptionId, CommandHandler observer,
                               std::future<WMessageResult>& sfuture) {
-    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
-
+    std::lock_guard<std::mutex> lock(mLock);
     int id = sendWSMessage(requestTemplateUnsubscribe, subscriptionId.c_str());
 
     if (id < 0) {
@@ -243,11 +241,10 @@ Status VisClient::unsubscribe(const std::string& subscriptionId, CommandHandler 
 }
 
 Status VisClient::unsubscribeAll(std::future<WMessageResult>& future) {
-    std::lock_guard<std::mutex> lock(mLock);
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
-
+    std::lock_guard<std::mutex> lock(mLock);
     int id = sendWSMessage(requestTemplateUnsubscribeAll, "unsubscribeAll");
 
     if (id < 0) {
@@ -357,8 +354,6 @@ void VisClient::handleServerDisconnect() {
 
 void VisClient::handleError(void* user) {
     ALOGV("handleError");
-    std::lock_guard<std::mutex> lock(mLock);
-
     switch (reinterpret_cast<size_t>(user)) {
         case CONNECTION_MODE_NON_SSL:
             ALOGE("Client emitted error in non SSL MODE...");
