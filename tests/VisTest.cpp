@@ -21,6 +21,55 @@ void resultHandler2(const CommandResult& /*result*/) {
 
 
 static const int MAX_F_TIME_SEC = 4;
+void testSubscribeStop() {
+    ALOGI("====================== testSubscribeStop =====================");
+    VisClient mVis;
+    mVis.start();
+    int cnt = 0;
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    while (mVis.getConnectedState() != ConnState::STATE_CONNECTED) {
+        sleep(1);
+        if (++cnt > 10) {
+            ALOGE("Unable to connect to VIS ");
+            mVis.stop();
+            return;
+        }
+    }
+    ALOGI("Will try to subscribe ....");
+    std::future<WMessageResult> f;
+    std::string str("*");
+    Status st = mVis.subscribeProperty( str,resultHandler,f);
+    ALOGI("Subscribe retrned OK = %d", st == Status::OK);
+    sleep(10);
+    mVis.stop();
+
+    ALOGI("======================*** testSubscribeStop ***=====================");
+}
+
+void testFailedSubscribe() {
+    ALOGI("====================== testFailedSubscribe =====================");
+    VisClient mVis;
+    //mVis.start();
+    ALOGI("Will try to subscribe ....");
+    std::future<WMessageResult> f;
+    std::string str("*");
+    Status st = mVis.subscribeProperty( str,resultHandler,f);
+    ALOGI("Subscribe retrned OK = %d", st == Status::OK);
+    if (!f.valid()) {
+        ALOGE("Returned future is not valid !");
+        mVis.stop();
+        return;
+    }
+    if (f.wait_for(std::chrono::seconds(MAX_F_TIME_SEC)) != std::future_status::ready) {
+        ALOGE("Unable to receive result, timeout %d !!!!", MAX_F_TIME_SEC);
+        mVis.stop();
+        return;
+    }
+    WMessageResult sr = f.get();
+    ALOGI("Subscription command retrned OK = %d", sr.status == Status::OK);
+    mVis.stop();
+    ALOGI("======================*** testFailedSubscribe ***=====================");
+}
 
 void testSubscribe() {
     ALOGI("====================== testSubscribe =====================");
@@ -268,6 +317,10 @@ void testAsyncSubscribe() {
 
 int main () {
     std::cout << "Test started \n";
+    testFailedSubscribe();
+    std::cout << "Test testFailedSubscribe completed \n";
+    testSubscribeStop();
+    std::cout << "Test testSubscribeStop completed \n";
     testSetSync();
     std::cout << "Test testSetSync completed \n";
     testGetSync();
