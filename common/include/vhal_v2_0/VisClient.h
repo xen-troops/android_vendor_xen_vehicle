@@ -78,6 +78,9 @@ class VisClient {
     void setUri(const std::string& uri);
 
     /* Asynchronous API */
+    /* Caller must check return result(and not use future if result is not OK)
+     * or validity of the future */
+
     Status getProperty(const std::string& propertyGet, std::future<WMessageResult>& future);
     Status setProperty(const std::string& propertySet, std::future<WMessageResult>& future);
     Status subscribeProperty(const std::string& propertyName, CommandHandler observer,
