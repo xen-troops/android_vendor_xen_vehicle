@@ -23,8 +23,6 @@
 namespace epam {
 
 VisClient::VisClient()
-: mConnectedState(ConnState::STATE_DISCONNECTED), mWs(nullptr), recoverSubscribe(false),
-  mServerConnectionHandler(nullptr)
 {
 }
 
@@ -182,21 +180,25 @@ Status VisClient::getProperty(const std::string& propertyPath,
     return Status::OK;
 }
 
-Status VisClient::setProperty(const std::string& propertySet, std::future<WMessageResult>& future) {
+Status VisClient::setProperty(const std::string& propertyPath, const std::string& propertyValue, std::future<WMessageResult>& future) {
     if (mConnectedState == ConnState::STATE_DISCONNECTED) {
         return Status::INVALID_STATE;
     }
     std::lock_guard<std::mutex> lock(mLock);
-    int id = sendWSMessage(requestTemplateSet, propertySet.c_str());
+    char request[kMaxBufferLength];
+    if (snprintf(request, kMaxBufferLength, requestTemplateSet, propertyPath.c_str(), propertyValue.c_str(), ++mRequestId) > 0) {
 
-    if (id < 0) {
-        return Status::UNKNOWN_ERROR;
+        // TODO(Andrii) : change return code type
+        if (sendWSMessage(request) != 0) {
+            return Status::UNKNOWN_ERROR;
+        }
+
+        std::promise<WMessageResult> p;
+        future = p.get_future();
+        mPromised.emplace(std::pair<int, std::promise<WMessageResult> >(mRequestId, std::move(p)));
+        return Status::OK;
     }
-
-    std::promise<WMessageResult> p;
-    future = p.get_future();
-    mPromised.emplace(std::pair<int, std::promise<WMessageResult> >(id, std::move(p)));
-    return Status::OK;
+    return Status::UNKNOWN_ERROR;
 }
 
 Status VisClient::subscribeProperty(const std::string& propertyName, CommandHandler observer,
@@ -268,9 +270,9 @@ Status VisClient::getPropertySync(const std::string& propertyGet, WMessageResult
     return result.status;
 }
 
-Status VisClient::setPropertySync(const std::string& propertySet) {
+Status VisClient::setPropertySync(const std::string& propertyPath, const std::string& propertyValue) {
     std::future<WMessageResult> f;
-    Status st = setProperty(propertySet, f);
+    Status st = setProperty(propertyPath, propertyValue, f);
     if (st != Status::OK) return st;
     if (f.wait_for(std::chrono::seconds(kMaxWsMessageDelaySec)) != std::future_status::ready) {
         ALOGE("setPropertySync timeout for %d second(s) !", kMaxWsMessageDelaySec);
@@ -320,10 +322,23 @@ Status VisClient::unsubscribeAllSync() {
 
 /* WS API */
 
+int VisClient::sendWSMessage(const char* request) {
+    if (mWs) {
+        ALOGV("Will send WS{%s}", request);
+        mWs->send(request);
+        return 0;
+    } else {
+        ALOGE("Unable to send command through, no websocket.");
+    }
+    return -1;
+}
+
 int VisClient::sendWSMessage(const char* templ, const char* param) {
     if (mWs) {
         char buffer[kMaxBufferLength];
-        snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
+        if (param != nullptr ) snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
+        else snprintf(buffer, kMaxBufferLength, templ, ++mRequestId);
+        ALOGV("Will send to WS %s", buffer);
         mWs->send(buffer);
         return mRequestId;
     } else {
@@ -336,6 +351,7 @@ int VisClient::sendWSMessage(const char* templ, const char* param, std::string& 
     if (mWs) {
         char buffer[kMaxBufferLength];
         snprintf(buffer, kMaxBufferLength, templ, param, ++mRequestId);
+        ALOGV("Will send to WS %s", buffer);
         mWs->send(buffer);
         message.assign(buffer);
         return mRequestId;

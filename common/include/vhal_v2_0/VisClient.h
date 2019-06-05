@@ -82,7 +82,7 @@ class VisClient {
      * or validity of the future */
 
     Status getProperty(const std::string& propertyGet, std::future<WMessageResult>& future);
-    Status setProperty(const std::string& propertySet, std::future<WMessageResult>& future);
+    Status setProperty(const std::string& propertyPath, const std::string& propertyValue, std::future<WMessageResult>& future);
     Status subscribeProperty(const std::string& propertyName, CommandHandler observer,
                              std::future<WMessageResult>& future);
     Status unsubscribe(const std::string& subscriptionId, CommandHandler observer,
@@ -92,7 +92,7 @@ class VisClient {
     /* Synchronous API */
 
     Status getPropertySync(const std::string& propertyGet, WMessageResult& result);
-    Status setPropertySync(const std::string& propertySet);
+    Status setPropertySync(const std::string& propertyPath, const std::string& propertyValue);
     Status subscribePropertySync(const std::string& propertyName, CommandHandler observer,
                                  WMessageResult& result);
     Status unsubscribeSync(const std::string& subscriptionId, CommandHandler observer,
@@ -115,6 +115,7 @@ class VisClient {
     int doInit();
     int poll();
 
+    int sendWSMessage(const char* message);
     int sendWSMessage(const char* templ, const char* param);
     int sendWSMessage(const char* templ, const char* param, std::string& message);
     void handleVisResponce(const std::map<std::string, Json::Value>& result);
@@ -197,7 +198,8 @@ class VisClient {
     static constexpr const char* requestTemplateSet =
         "{\
             \"action\": \"set\",\
-            \"value\": {%s},\
+            \"path\": \"%s\",\
+            \"value\": %s,\
             \"requestId\": \"%d\"\
     }";
 

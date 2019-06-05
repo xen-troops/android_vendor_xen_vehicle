@@ -167,9 +167,9 @@ StatusCode VisVehicleHal::set(const VehiclePropValue& propValue) {
         }
         ALOGD("Found mapped property 0x%x area 0x%x to vis %s", propValue.prop, propValue.areaId,
               it->second.c_str());
-        std::stringstream aa;
-        aa << "\"" << it->second << "\":" << vehiclePropValueToString(propValue);
-        epam::Status st = mVisClient.setPropertySync(aa.str());
+        /*std::stringstream aa;
+        aa << "\"" << it->second << "\":" << vehiclePropValueToString(propValue);*/
+        epam::Status st = mVisClient.setPropertySync(it->second , vehiclePropValueToString(propValue));
         if (st != epam::Status::OK) {
             ALOGE("SET retrned != OK [%d]", st);
             return StatusCode::TRY_AGAIN;
