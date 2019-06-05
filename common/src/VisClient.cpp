@@ -130,7 +130,7 @@ int VisClient::init() {
 
     if (mUri.empty()) {
         char propValue[PROPERTY_VALUE_MAX] = {};
-        property_get("persist.vis.uri", propValue, "wss://192.168.0.1:8088");
+        property_get("persist.vis.uri", propValue, kDefaultVisUri);
         mUri = propValue;
     }
 

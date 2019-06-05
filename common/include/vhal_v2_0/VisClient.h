@@ -138,17 +138,20 @@ class VisClient {
     void handleDisconnection(uWS::WebSocket<uWS::CLIENT>* ws, int code, char* message,
                              size_t length);
 
-    int mProtocolErrorCount = 0;
-    int mRequestId = 0;
+    int mProtocolErrorCount {0};
+    int mRequestId {0};
+    bool recoverSubscribe {false};
+    std::atomic<bool> mIsActive {false};
+    ConnectionHandler mServerConnectionHandler {nullptr};
+    uWS::WebSocket<uWS::CLIENT>* mWs {nullptr};
+    static constexpr const char* const kDefaultVisUri {"wss://192.168.0.1:8088"};
+    std::atomic<ConnState> mConnectedState {ConnState::STATE_DISCONNECTED};
 
     std::string mUri;
     uWS::Hub mHub;
-    std::atomic<ConnState> mConnectedState;
     mutable std::mutex mLock;
     std::map<size_t, std::promise<Status>> mRequesIdToPromise;
     std::thread mThread;
-    std::atomic<bool> mIsActive;
-    uWS::WebSocket<uWS::CLIENT>* mWs;
     // Mapping of requestId to subscribe handler
     std::map<int, SubscriptionRequest> mSubscriptionObservers;
     // Mapping of subscribeId to subscribe handler
@@ -160,8 +163,9 @@ class VisClient {
     std::map<int, SubscriptionRequest> mRecoverObservers;
 #endif
 
-    bool recoverSubscribe;
-    ConnectionHandler mServerConnectionHandler;
+    static const int kMaxBufferLength {1024};
+    static const int kMaxWsMessageDelaySec {16};
+    static const int kSleepTimeAfterErrorUs {100000};
 
     static constexpr const char* requestTemplateGet =
         "{\
@@ -197,26 +201,21 @@ class VisClient {
             \"requestId\": \"%d\"\
     }";
 
-    static constexpr const char* const kDefaultVisUri = "wss://192.168.1.100:8088";
-
-    static constexpr const int kMaxBufferLength = 1024;
-    static const int kMaxWsMessageDelaySec = 10;
-    static const int kSleepTimeAfterErrorUs = 100000;
 
  public:
-    static constexpr const char* const kAllTag = "*";
-    static constexpr const char* const kValueTag = "value";
-    static constexpr const char* const kTimestampTag = "timestamp";
-    static constexpr const char* const kActionTag = "action";
-    static constexpr const char* const kErrorTag = "error";
-    static constexpr const char* const kRequestIdTag = "requestId";
-    static constexpr const char* const kSubscriptionIdTag = "subscriptionId";
-    static constexpr const char* const kActionGetTag = "get";
-    static constexpr const char* const kActionSetTag = "set";
-    static constexpr const char* const kActionSubscribeTag = "subscribe";
-    static constexpr const char* const kActionSubscriptionTag = "subscription";
-    static constexpr const char* const kActionUnsubscribeTag = "unsubscribe";
-    static constexpr const char* const kActionUnsubscribeAllTag = "unsubscribeAll";
+    static constexpr const char* const kAllTag {"*"};
+    static constexpr const char* const kValueTag {"value"};
+    static constexpr const char* const kTimestampTag {"timestamp"};
+    static constexpr const char* const kActionTag {"action"};
+    static constexpr const char* const kErrorTag {"error"};
+    static constexpr const char* const kRequestIdTag {"requestId"};
+    static constexpr const char* const kSubscriptionIdTag {"subscriptionId"};
+    static constexpr const char* const kActionGetTag {"get"};
+    static constexpr const char* const kActionSetTag {"set"};
+    static constexpr const char* const kActionSubscribeTag {"subscribe"};
+    static constexpr const char* const kActionSubscriptionTag {"subscription"};
+    static constexpr const char* const kActionUnsubscribeTag {"unsubscribe"};
+    static constexpr const char* const kActionUnsubscribeAllTag {"unsubscribeAll"};
 };
 
 }  // namespace epam
