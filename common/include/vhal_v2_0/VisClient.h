@@ -145,7 +145,7 @@ class VisClient {
     std::atomic<bool> mIsActive {false};
     ConnectionHandler mServerConnectionHandler {nullptr};
     uWS::WebSocket<uWS::CLIENT>* mWs {nullptr};
-    static constexpr const char* const kDefaultVisUri {"wss://192.168.0.1:8088"};
+    static constexpr const char* const kDefaultVisUri {"wss://wwwivi:8088"};
     std::atomic<ConnState> mConnectedState {ConnState::STATE_DISCONNECTED};
 
     std::string mUri;
