@@ -54,6 +54,8 @@ class VisVehicleHal : public VehicleHal {
     StatusCode subscribe(int32_t property, float sampleRate) override;
     StatusCode unsubscribe(int32_t property) override;
 
+    VehicleHal::VehiclePropValuePtr createApPowerStateReq(VehicleApPowerStateReq state, int32_t param);
+
  private:
     void initStaticConfig();
     void createPropertyMappingsFromConfig();
