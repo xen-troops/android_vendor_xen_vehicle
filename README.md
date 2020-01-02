@@ -21,7 +21,8 @@ Will be moved to separate project
 
 You can define VIS uri by setting Android property:
 ```persist.vis.uri```
-The default value of it is: ```wss://192.168.0.1:8088``` (it is DomD IP).
+The default value of it is: ```wss://wwwivi:8088``` (it is DomD IP).
+It is preferred to use a hostname and define it in resolver.
 
 Static VIS to Android property mapping is done in: ``` DefaultConfig.h```
 But you can provide json configuration file(like ```cfg/vehicle-mappings.json```) and override static mappings. The path to this file is configurable using Android property: ```persist.vehicle.prop-mapping```. Default path is: ```/vendor/etc/vehicle/vehicle-mappings.json```.
