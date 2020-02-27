@@ -40,59 +40,13 @@ cc_binary {
         "libuws",
         "libz",
     ],
-    local_include_dirs: ["common/include/vhal_v2_0"],
-        cflags: [
+    local_include_dirs: [
+        "common/include",
+        "common/include/vhal_v2_0",
+    ],
+    cflags: [
         "-Wall",
         "-Wextra",
         "-Werror",
     ],
-}
-
-cc_library {
-    name: "libvisclient",
-    vendor: true,
-    srcs: [
-        "common/src/VisClient.cpp",
-    ],
-    static_libs: [
-    	"libjsoncpp",
-    ],
-    shared_libs: [
-        "liblog",
-        "libuws",
-        "libcrypto",
-        "libz",
-        "libcutils",
-    ],
-    local_include_dirs: ["common/include/vhal_v2_0"],
-    export_include_dirs: [
-        "common/include",
-        "common/include/vhal_v2_0",
-    ],
-    export_shared_lib_headers:[
-        "libuws",
-    ],
-    export_static_lib_headers:[
-        "libjsoncpp",
-    ],
-}
-
-cc_test {
-    name: "vis_test",
-    vendor: true,
-    srcs: [
-        "tests/VisTest.cpp",
-    ],
-    shared_libs: [
-        "liblog",
-        "libuws",
-        "libcrypto",
-        "libz",
-        "libcutils",
-        "libvisclient",
-    ],
-    static_libs: [
-        "libjsoncpp",
-    ],
-    local_include_dirs: ["common/include/vhal_v2_0"],
 }
