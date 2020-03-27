@@ -10,7 +10,7 @@ as a client of VIS server.
 
 # uWebSockets
 Forked and hosted at:
- https://github.com/xen-troops/uWebSockets/tree/android-9.0.0_r3-xt0.2
+ https://github.com/xen-troops/uWebSockets/tree/android-10.0.0_r3-master
 
 This is an indirect dependency.
 
