@@ -31,7 +31,6 @@ cc_binary {
         "libbase",
         "libvisclient",
         "libhidlbase",
-        "libhidltransport",
         "liblog",
         "libutils",
         "android.hardware.automotive.vehicle@2.0",
