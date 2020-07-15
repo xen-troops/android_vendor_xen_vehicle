@@ -38,6 +38,16 @@ cc_binary {
         "libcutils",
         "libuws",
         "libz",
+        "libprotobuf-cpp-lite",
+
+    ],
+    static_libs: [
+        "android.hardware.automotive.vehicle@2.0-manager-lib",
+        "android.hardware.automotive.vehicle@2.0-default-impl-lib",
+        "android.hardware.automotive.vehicle@2.0-libproto-native",
+        "libjsoncpp",
+        "libqemu_pipe",
+
     ],
     local_include_dirs: [
         "common/include",
