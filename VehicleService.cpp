@@ -18,11 +18,13 @@
 #define LOG_TAG "automotive.vehicle@2.0-service.xenvm"
 #include <android/log.h>
 #include <hidl/HidlTransportSupport.h>
+#include <cutils/properties.h>
 
 #include <iostream>
 
 #include <vhal_v2_0/VehicleHalManager.h>
 #include <vhal_v2_0/VisVehicleHal.h>
+#include <vhal_v2_0/EmulatedVehicleHal.h>
 
 using namespace android;
 using namespace android::hardware;
@@ -31,11 +33,22 @@ using namespace android::hardware::automotive::vehicle::V2_0::xenvm;
 
 int main(int /* argc */, char* /* argv */ []) {
     auto store = std::make_unique<VehiclePropertyStore>();
-    auto hal = std::make_unique<VisVehicleHal>(store.get());
+    std::unique_ptr<VehicleHal>  hal;
+    // Used only for EmulatedVehicleHal
+    std::unique_ptr<impl::VehicleEmulator> emulator;
+
+    if (property_get_bool("persist.vehicle.use-vis-hal", true)) {
+        hal = std::make_unique<VisVehicleHal>(store.get());
+        ALOGI("Using VisVehicleHal ...");
+    } else {
+        auto hal_emu = std::make_unique<impl::EmulatedVehicleHal>(store.get());
+        emulator = std::make_unique<impl::VehicleEmulator>(hal_emu.get());
+        hal.reset(hal_emu.release());
+        ALOGI("Using EmulatedVehicleHal ...");
+    }
+
     auto service = std::make_unique<VehicleHalManager>(hal.get());
-
     configureRpcThreadpool(4, true /* callerWillJoin */);
-
     ALOGI("Registering as service...");
     status_t status = service->registerAsService();
 
