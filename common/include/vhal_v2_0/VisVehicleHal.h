@@ -39,6 +39,7 @@ namespace V2_0 {
 namespace xenvm {
 
 class VisVehicleHal : public VehicleHal {
+    friend VehiclePropertyStore;
     using VehicleAreaProperty = VehiclePropertyStore::RecordId;
 
  public:
@@ -47,7 +48,7 @@ class VisVehicleHal : public VehicleHal {
 
     //  Methods from VehicleHal
     void onCreate() override;
-    std::vector<VehiclePropConfig> listProperties() const override;
+    std::vector<VehiclePropConfig> listProperties();
     VehiclePropValuePtr get(const VehiclePropValue& requestedPropValue,
                             StatusCode* outStatus) override;
     StatusCode set(const VehiclePropValue& propValue) override;

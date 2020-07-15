@@ -19,10 +19,6 @@
 #define android_hardware_automotive_vehicle_V2_0_VehicleHal_H
 
 #include <android/hardware/automotive/vehicle/2.0/IVehicle.h>
-
-#include <utility>
-#include <vector>
-
 #include "VehicleObjectPool.h"
 
 namespace android {
@@ -36,16 +32,16 @@ namespace V2_0 {
  * Vendor.
  */
 class VehicleHal {
- public:
+public:
     using VehiclePropValuePtr = recyclable_ptr<VehiclePropValue>;
 
     using HalEventFunction = std::function<void(VehiclePropValuePtr)>;
-    using HalErrorFunction =
-        std::function<void(StatusCode errorCode, int32_t property, int32_t areaId)>;
+    using HalErrorFunction = std::function<void(
+            StatusCode errorCode, int32_t property, int32_t areaId)>;
 
     virtual ~VehicleHal() {}
 
-    virtual std::vector<VehiclePropConfig> listProperties() const = 0;
+    virtual std::vector<VehiclePropConfig> listProperties() = 0;
     virtual VehiclePropValuePtr get(const VehiclePropValue& requestedPropValue,
                                     StatusCode* outStatus) = 0;
 
@@ -60,7 +56,8 @@ class VehicleHal {
      *                   rate, e.g. for properties with
      *                   VehiclePropertyChangeMode::CONTINUOUS
      */
-    virtual StatusCode subscribe(int32_t property, float sampleRate) = 0;
+    virtual StatusCode subscribe(int32_t property,
+                                 float sampleRate) = 0;
 
     /**
      * Unsubscribe from HAL events for given property
@@ -74,8 +71,10 @@ class VehicleHal {
      */
     virtual void onCreate() {}
 
-    void init(VehiclePropValuePool* valueObjectPool, const HalEventFunction& onHalEvent,
-              const HalErrorFunction& onHalError) {
+    void init(
+        VehiclePropValuePool* valueObjectPool,
+        const HalEventFunction& onHalEvent,
+        const HalErrorFunction& onHalError) {
         mValuePool = valueObjectPool;
         mOnHalEvent = onHalEvent;
         mOnHalPropertySetError = onHalError;
@@ -83,18 +82,23 @@ class VehicleHal {
         onCreate();
     }
 
-    VehiclePropValuePool* getValuePool() { return mValuePool; }
-
- protected:
+    VehiclePropValuePool* getValuePool() {
+        return mValuePool;
+    }
+protected:
     /* Propagates property change events to vehicle HAL clients. */
-    void doHalEvent(VehiclePropValuePtr v) { mOnHalEvent(std::move(v)); }
+    void doHalEvent(VehiclePropValuePtr v) {
+        mOnHalEvent(std::move(v));
+    }
 
     /* Propagates error during set operation to the vehicle HAL clients. */
-    void doHalPropertySetError(StatusCode errorCode, int32_t propId, int32_t areaId) {
+    void doHalPropertySetError(StatusCode errorCode,
+                               int32_t propId,
+                               int32_t areaId) {
         mOnHalPropertySetError(errorCode, propId, areaId);
     }
 
- private:
+private:
     HalEventFunction mOnHalEvent;
     HalErrorFunction mOnHalPropertySetError;
     VehiclePropValuePool* mValuePool;
@@ -106,4 +110,4 @@ class VehicleHal {
 }  // namespace hardware
 }  // namespace android
 
-#endif  // android_hardware_automotive_vehicle_V2_0_VehicleHal_H_
+#endif //android_hardware_automotive_vehicle_V2_0_VehicleHal_H_
