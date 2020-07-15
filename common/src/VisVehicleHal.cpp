@@ -218,7 +218,7 @@ StatusCode VisVehicleHal::set(const VehiclePropValue& propValue) {
     return StatusCode::OK;
 }
 
-std::vector<VehiclePropConfig> VisVehicleHal::listProperties() const {
+std::vector<VehiclePropConfig> VisVehicleHal::listProperties() {
     return mPropStore->getAllConfigs();
 }
 
