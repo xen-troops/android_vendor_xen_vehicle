@@ -39,10 +39,10 @@ namespace automotive {
 namespace vehicle {
 namespace V2_0 {
 
-namespace impl {
+namespace xenvm {
 
 /** Implementation of VehicleHal that connected to emulator instead of real vehicle network. */
-class EmulatedVehicleHal : public EmulatedVehicleHalIface {
+class EmulatedVehicleHal : public impl::EmulatedVehicleHalIface {
 public:
     EmulatedVehicleHal(VehiclePropertyStore* propStore);
     ~EmulatedVehicleHal() = default;
@@ -85,7 +85,7 @@ private:
     VehiclePropertyStore* mPropStore;
     std::unordered_set<int32_t> mHvacPowerProps;
     RecurrentTimer mRecurrentTimer;
-    GeneratorHub mGeneratorHub;
+    impl::GeneratorHub mGeneratorHub;
 };
 
 }  // impl

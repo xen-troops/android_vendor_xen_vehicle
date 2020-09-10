@@ -23,13 +23,16 @@
 #include "LinearFakeValueGenerator.h"
 #include "Obd2SensorStore.h"
 
+using namespace android::hardware::automotive::vehicle::V2_0::impl;
+
 namespace android {
 namespace hardware {
 namespace automotive {
 namespace vehicle {
 namespace V2_0 {
 
-namespace impl {
+namespace xenvm {
+
 
 static std::unique_ptr<Obd2SensorStore> fillDefaultObd2Frame(size_t numVendorIntegerSensors,
                                                              size_t numVendorFloatSensors) {
