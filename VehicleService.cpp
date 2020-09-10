@@ -24,7 +24,7 @@
 
 #include <vhal_v2_0/VehicleHalManager.h>
 #include <vhal_v2_0/VisVehicleHal.h>
-#include <vhal_v2_0/EmulatedVehicleHal.h>
+#include "EmulatedVehicleHal.h"
 
 using namespace android;
 using namespace android::hardware;
@@ -41,7 +41,7 @@ int main(int /* argc */, char* /* argv */ []) {
         hal = std::make_unique<VisVehicleHal>(store.get());
         ALOGI("Using VisVehicleHal ...");
     } else {
-        auto hal_emu = std::make_unique<impl::EmulatedVehicleHal>(store.get());
+        auto hal_emu = std::make_unique<EmulatedVehicleHal>(store.get());
         emulator = std::make_unique<impl::VehicleEmulator>(hal_emu.get());
         hal.reset(hal_emu.release());
         ALOGI("Using EmulatedVehicleHal ...");

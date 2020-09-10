@@ -62,7 +62,7 @@ VehicleEmulator::~VehicleEmulator() {
  * changed.
  */
 void VehicleEmulator::doSetValueFromClient(const VehiclePropValue& propValue) {
-    emulator::EmulatorMessage msg;
+    vhal_proto::EmulatorMessage msg;
     emulator::VehiclePropValue *val = msg.add_value();
     populateProtoVehiclePropValue(val, &propValue);
     msg.set_status(emulator::RESULT_OK);
@@ -187,8 +187,8 @@ void VehicleEmulator::doSetProperty(VehicleEmulator::EmulatorMessage const& rxMs
     respMsg.set_status(halRes ? emulator::RESULT_OK : emulator::ERROR_INVALID_PROPERTY);
 }
 
-void VehicleEmulator::processMessage(emulator::EmulatorMessage const& rxMsg,
-                                     emulator::EmulatorMessage& respMsg) {
+void VehicleEmulator::processMessage(vhal_proto::EmulatorMessage const& rxMsg,
+                                     vhal_proto::EmulatorMessage& respMsg) {
     switch (rxMsg.msg_type()) {
         case emulator::GET_CONFIG_CMD:
             doGetConfig(rxMsg, respMsg);

@@ -26,6 +26,7 @@ cc_binary {
         "common/src/VehiclePropertyStore.cpp",
         "common/src/VehicleUtils.cpp",
         "common/src/VisVehicleHal.cpp",
+        "impl/vhal_v2_0/EmulatedVehicleHal.cpp",
     ],
     shared_libs: [
         "libbase",
@@ -52,6 +53,7 @@ cc_binary {
     local_include_dirs: [
         "common/include",
         "common/include/vhal_v2_0",
+        "impl/vhal_v2_0"
     ],
     cflags: [
         "-Wall",
