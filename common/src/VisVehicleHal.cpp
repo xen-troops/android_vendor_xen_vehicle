@@ -301,8 +301,8 @@ void VisVehicleHal::createPropertyMappingsFromConfig() {
     std::ifstream configFile(propValue);
     if (configFile.is_open()) {
         Json::Value root;
-        Json::Reader reader;
-        if (reader.parse(configFile, root, false)) {
+	configFile >> root;
+        if ( root.isNull()) {
             if (root.isArray()) {
                 for (unsigned int i = 0; i < root.size(); i++) {
                     Json::Value val = root[i];
@@ -334,7 +334,7 @@ void VisVehicleHal::createPropertyMappingsFromConfig() {
                 }
             }
         } else {
-            ALOGE("Property config parsing failed %s", reader.getFormatedErrorMessages().c_str());
+            ALOGE("Property config parsing failed ....");
             // abort();
         }
 
