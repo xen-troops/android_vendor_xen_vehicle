@@ -661,6 +661,13 @@ bool VisVehicleHal::jsonToVehicle(const Json::Value& jval, struct VehiclePropVal
             return false;
             break;
     }
+    if (val.prop == toInt(VehicleProperty::CURRENT_GEAR)) {
+	    switch (val.value.int32Values[0]) {
+		    case -1 : {val.value.int32Values[0] = toInt(VehicleGear::GEAR_REVERSE); break;}
+		    case  0 : {val.value.int32Values[0] = toInt(VehicleGear::GEAR_PARK); break;}
+		    case  3 : {val.value.int32Values[0] = toInt(VehicleGear::GEAR_DRIVE); break;}
+	    }
+    }
     return true;
 }
 
