@@ -82,7 +82,7 @@ const ConfigDeclaration kVehicleProperties[]{
              .access = VehiclePropertyAccess::READ,
              .changeMode = VehiclePropertyChangeMode::STATIC,
          },
-     .initialValue = {.floatValues = {15000}},
+     .initialValue = {.floatValues = {100}},
      .initialAreaToVIS = {{0,"Attribute.Vehicle.Drivetrain.FuelSystem.TankCapacity"}}
     },
 
