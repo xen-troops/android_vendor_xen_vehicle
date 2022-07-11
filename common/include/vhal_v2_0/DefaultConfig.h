@@ -126,7 +126,7 @@ const ConfigDeclaration kVehicleProperties[]{
              .maxSampleRate = 10.0f,
          },
      .initialValue = {.floatValues = {0.0f}},
-     .initialAreaToVIS = {{0,"Signal.Emulator.telemetry.veh_speed"}},
+     .initialAreaToVIS = {{0,"Signal.Cabin.Infotainment.Navigation.CurrentLocation.Speed"}},
     },
 
     {.config =
@@ -156,8 +156,8 @@ const ConfigDeclaration kVehicleProperties[]{
              .access = VehiclePropertyAccess::READ,
              .changeMode = VehiclePropertyChangeMode::CONTINUOUS,
          },
-     .initialValue = {.floatValues = {15000}},
-     .initialAreaToVIS = {{0,"Signal.Emulator.telemetry.avgfuellvl"}},
+     .initialValue = {.floatValues = {100}},
+     .initialAreaToVIS = {{0,"Signal.Drivetrain.FuelSystem.Level"}},
     },
     {.config =
          {
@@ -176,7 +176,7 @@ const ConfigDeclaration kVehicleProperties[]{
              .changeMode = VehiclePropertyChangeMode::ON_CHANGE,
          },
      .initialValue = {.int32Values = {toInt(VehicleGear::GEAR_PARK)}},
-     .initialAreaToVIS = {{0,"Attribute.Vehicle.Drivetrain.Transmission.CurrentGear"}},
+     .initialAreaToVIS = {{0,"Signal.Drivetrain.Transmission.Gear"}},
     },
 
     {.config =
