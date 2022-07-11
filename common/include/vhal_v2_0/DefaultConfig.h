@@ -97,6 +97,18 @@ const ConfigDeclaration kVehicleProperties[]{
     },
 
     {.config =
+	 {
+	      .prop = toInt(VehicleProperty::RANGE_REMAINING),
+	      .access = VehiclePropertyAccess::READ_WRITE,
+	      .changeMode = VehiclePropertyChangeMode::CONTINUOUS,
+	      .minSampleRate = 1.0f,
+	      .maxSampleRate = 2.0f,
+	 },
+     .initialValue = {.floatValues = {1000000.0f}},  // units in meters
+     .initialAreaToVIS = {{0,"Attribute.Vehicle.Drivetrain.FuelSystem.RangeRemain"}},
+    },
+
+    {.config =
          {
              .prop = toInt(VehicleProperty::INFO_MAKE),
              .access = VehiclePropertyAccess::READ,
